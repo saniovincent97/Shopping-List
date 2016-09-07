@@ -52,54 +52,73 @@ function add_item()
 """
 import csv
 
-OPTIONS = "\n Menu: \n R - List required items \n C - List Completed items \n A - Add new item" \
+OPTIONS = "\n Menu:\n R - List required items \n C - List Completed items \n A - Add new item" \
           " \n M - Mark an item as completed \n Q - Quit"
 
 
 def main():
-    print("Welcome to Shopping List v1.0")
-    name = input("Please enter your name")
-    print("Welcome {}".format(name))
-    print("{} items loaded from items.csv".format(count_lines("items.csv"), ))
+    items = load_contents()
+    print("Shopping List v1.0 - by Sanio Vincent")
+    print("{} items loaded from items.csv".format(len(items)))
     print(OPTIONS)
     input_option = input("-> ")
     while input_option != "q" and input_option != "Q":
         if input_option == "r" or input_option == "R":
-            show_content = read_contents()
+            required_items(items)
+        elif input_option == "c" or input_option == "C":
+            completed_items(items)
         elif input_option == "a" or input_option == "A":
-            add_items()
+            add_items(items)
         elif input_option == "m" or input_option == "M":
-            show_content = read_contents()
+            required_items(items)
+            input_number = int(input("Enter the number of an item to mark as completed"))
+            mark_as_completed(items, input_number)
 
         else:
             print("Please enter the correct value")
         print(OPTIONS)
         input_option = input("->")
-    print("{} items loaded from items.csv".format(count_lines("items.csv"), ))
+    print("{} items loaded from items.csv".format(len(items)))
     print("Thank you for using Shopping List")
 
-
-def count_lines(filename):
-    count_file = open(filename, "r")
-    read_lines = count_file.readlines()
-    count_file.close()
-    number_of_lines = len(read_lines)
-    return number_of_lines
+def mark_as_completed(items, input_number):
+    for number, item in enumerate(items):
+        if input_number == number:
+            item[3] = "c"
+            print("{} marked as complete".format(item[0]))
 
 
-def read_contents():
-    number = 0
-    read_items = open("items.csv")
+def load_contents():
+    items = []
+    read_items = open("items.csv", "r")
     item_file = csv.reader(read_items)
-    items = list(item_file)
-    for row in items:
-        print("{}. {:20} $ {:5} ({})".format(number, row[0], row[1], row[2]))
-        number += 1
-    print("Total expected price for {} item is:".format(number))
+    for item in item_file:
+        items.append([item[0], float(item[1]), int(item[2]), item[3]])
+    read_items.close()
+    return items
 
 
-def add_items():
-    open_file = open("items.csv", "a+")
+def required_items(items):
+    total = 0
+    print("Required items:")
+    for number, item in enumerate(items):
+        if item[3] == "r":
+            print("{}. {:20} ${:.2f} ({})".format(number, item[0], float(item[1]), int(item[2],)))
+            total += item[1]
+    print("Total expected price for {} items: ${}".format(len(items), total))
+
+
+def completed_items(items):
+    total = 0
+    for number, item in enumerate(items):
+        if item[3] == "c":
+            print("{}. {:20} ${:.2f} ({})".format(number, item[0], float(item[1]), int(item[2],)))
+            total += item[1]
+    print("Total expected price for {} items: ${}".format(len(items), total))
+
+
+
+def add_items(items):
     item_name = input("Item name: ")
     item_name_length = len(item_name)
     if item_name_length == 0:
@@ -110,10 +129,11 @@ def add_items():
             while item_price >= 0:
                 item_priority = int(input("Priority: "))
                 if item_priority > 0 and item_priority <= 3:
-                    print("{}, ${:.2f} (priority {}) added to shopping list".format(item_name, item_price,
+                    print("{} ${:.2f} (priority {}) added to shopping list".format(item_name, item_price,
                                                                                     item_priority))
-                    print(item_name, ",", item_price, ",", item_priority, file=open_file)
-                    open_file.close()
+                    required = "r"
+                    items.append([item_name, item_price, item_priority, required])
+                    return items
                 else:
                     print("Priority value must be 1,2 or 3")
             else:
