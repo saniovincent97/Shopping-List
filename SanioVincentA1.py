@@ -73,8 +73,7 @@ def main():
             add_items(items)
         elif input_option == "m" or input_option == "M":
             required_items(items, )
-            input_number = int(input("Enter the number of an item to mark as completed"))
-            mark_as_completed(items, input_number)
+            mark_as_completed(items)
         else:
             print("Please enter the correct value")
         print(OPTIONS)
@@ -84,12 +83,19 @@ def main():
     print("Thank you for using Shopping List")
 
 
-def mark_as_completed(items, input_number):
+def mark_as_completed(items):
     # takes items that are required and mark them as completed
-    for number, item in enumerate(items):
-        if input_number == number:
-            item[3] = "c"
-            print("\n{} marked as complete".format(item[0]))
+    try:
+        input_number = int(input("Enter the number of an item to mark as completed"))
+        for number, item in enumerate(items):
+            if input_number == number:
+                item[3] = "c"
+                print("\n{} marked as complete".format(item[0]))
+                return items
+        else:
+            print("Please enter a valid number")
+    except ValueError:
+        print("Please enter a proper value")
 
 
 def load_contents():
