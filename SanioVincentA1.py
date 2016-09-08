@@ -51,6 +51,7 @@ function add_item()
 
 """
 import csv
+from operator import itemgetter
 
 OPTIONS = "\n Menu:\n R - List required items \n C - List Completed items \n A - Add new item" \
           " \n M - Mark an item as completed \n Q - Quit"
@@ -63,6 +64,7 @@ def main():
     print(OPTIONS)
     input_option = input("-> ")
     while input_option != "q" and input_option != "Q":
+        items = sorted(items, key=itemgetter(2))
         if input_option == "r" or input_option == "R":
             required_items(items)
         elif input_option == "c" or input_option == "C":
@@ -70,25 +72,28 @@ def main():
         elif input_option == "a" or input_option == "A":
             add_items(items)
         elif input_option == "m" or input_option == "M":
-            required_items(items)
+            required_items(items, )
             input_number = int(input("Enter the number of an item to mark as completed"))
             mark_as_completed(items, input_number)
-
         else:
             print("Please enter the correct value")
         print(OPTIONS)
         input_option = input("->")
-    print("{} items loaded from items.csv".format(len(items)))
+    save_contents(items)
+    print("{} items saved to items.csv".format(len(items)))
     print("Thank you for using Shopping List")
 
+
 def mark_as_completed(items, input_number):
+    # takes items that are required and mark them as completed
     for number, item in enumerate(items):
         if input_number == number:
             item[3] = "c"
-            print("{} marked as complete".format(item[0]))
+            print("\n{} marked as complete".format(item[0]))
 
 
 def load_contents():
+    # takes items from the file and appends it into the items list
     items = []
     read_items = open("items.csv", "r")
     item_file = csv.reader(read_items)
@@ -98,27 +103,37 @@ def load_contents():
     return items
 
 
+def save_contents(items):
+    # takes the items marked as complete and writes it into the file
+    open_items = open("items.csv", "w+")
+    for item in items:
+        if item[3] == "c":
+            open_items.write("{},{},{},{}\n".format(item[0], item[1], item[2], item[3]))
+
+
 def required_items(items):
+    # prints out the items from the list that are marked as required
     total = 0
-    print("Required items:")
+    print("\nRequired items:")
     for number, item in enumerate(items):
         if item[3] == "r":
-            print("{}. {:20} ${:.2f} ({})".format(number, item[0], float(item[1]), int(item[2],)))
+            print("{}. {:20} ${:.2f} ({})".format(number, item[0], (item[1]), int(item[2], )))
             total += item[1]
     print("Total expected price for {} items: ${}".format(len(items), total))
 
 
 def completed_items(items):
+    # prints out the items that are marked as completed
     total = 0
     for number, item in enumerate(items):
         if item[3] == "c":
-            print("{}. {:20} ${:.2f} ({})".format(number, item[0], float(item[1]), int(item[2],)))
+            print("{}. {:20} ${:.2f} ({})".format(number, item[0], float(item[1]), int(item[2], )))
             total += item[1]
-    print("Total expected price for {} items: ${}".format(len(items), total))
-
+    print("Total expected price for {} items: ${:.2f}".format(len(items), total))
 
 
 def add_items(items):
+    # appends the inputted item name,price and priority to the items list
     item_name = input("Item name: ")
     item_name_length = len(item_name)
     if item_name_length == 0:
@@ -128,9 +143,9 @@ def add_items(items):
             item_price = float(input("Price: $"))
             while item_price >= 0:
                 item_priority = int(input("Priority: "))
-                if item_priority > 0 and item_priority <= 3:
-                    print("{} ${:.2f} (priority {}) added to shopping list".format(item_name, item_price,
-                                                                                    item_priority))
+                if 1 <= item_priority <= 3:
+                    print(
+                        "{} ${:.2f} (priority {}) added to shopping list".format(item_name, item_price, item_priority))
                     required = "r"
                     items.append([item_name, item_price, item_priority, required])
                     return items
